@@ -31,6 +31,9 @@ const mapStateToProps = (state: RootState) => {
   };
 };
 
-export default connect(mapStateToProps, {
-  load: todoActions.load
-})(TodoContainer);
+export default connect(
+  mapStateToProps,
+  {
+    load: todoActions.load
+  }
+)(TodoContainer);

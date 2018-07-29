@@ -1,5 +1,3 @@
-import createHistory from 'history/createBrowserHistory';
-import { RouterAction } from 'react-router-redux';
 import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
 import { combineEpics, createEpicMiddleware } from 'redux-observable';
 import { createSelector } from 'reselect';
@@ -7,13 +5,11 @@ import { TodoAction } from './todo/actions';
 import { epics as todoEipcs } from './todo/epics';
 import * as fromTodo from './todo/reducer';
 
-export type RootAction = TodoAction | RouterAction;
+export type RootAction = TodoAction;
 
 export interface RootState {
   todo: fromTodo.State;
 }
-
-export const history = createHistory();
 
 const rootEpic = combineEpics(...todoEipcs);
 
@@ -28,13 +24,17 @@ const composeEnhancers =
   compose;
 
 function configureStore(initialState?: RootState) {
+  const epicMiddleware = createEpicMiddleware<RootAction, RootAction, RootState>();
   // configure middlewares
-  const middlewares = [createEpicMiddleware(rootEpic)];
+  const middlewares = [epicMiddleware];
 
   // compose enhancers
   const enhancer = composeEnhancers(applyMiddleware(...middlewares));
 
-  return createStore(rootReducer, initialState!, enhancer);
+  const storeInsrance = createStore(rootReducer, initialState!, enhancer);
+
+  epicMiddleware.run(rootEpic);
+  return storeInsrance;
 }
 
 // pass an optional param to rehydrate state on app start
